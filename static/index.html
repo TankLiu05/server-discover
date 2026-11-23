@@ -1,82 +1,138 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>服务器监控</title>
-  <style>
-    :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17263b;background:#f5f7fa;line-height:1.5;font-synthesis:none}
-    *{box-sizing:border-box}body{margin:0}h1,h2,p{margin:0}h1{font-size:20px;font-weight:750;letter-spacing:-.035em}h2{font-size:18px;font-weight:720;letter-spacing:-.02em}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}[hidden]{display:none!important}
-    .muted{color:#8491a3;font-size:13px}.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.space{margin-left:auto}.top{height:76px;padding:0 36px;background:#fff;border-bottom:1px solid #e7ecf1}.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border-radius:11px;background:#173c46;color:#b1e7d4;display:grid;place-items:center;font-size:20px;font-weight:800}.brand .muted{font-size:12px}.user-chip{border:1px solid #e4e9ed;border-radius:20px;padding:6px 12px;font-size:12px;color:#46596c;background:#f9fafb}
-    #dashboard{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:calc(100vh - 76px)}.nav{background:#14212c;padding:32px 14px;display:flex;flex-direction:column;gap:5px}.nav-title{color:#697f8c;font-size:10px;letter-spacing:.16em;font-weight:800;margin:8px 13px 13px}.nav button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:transparent;border:0;color:#9dafbb;text-align:left;border-radius:8px;font-size:13px;font-weight:600}.nav button:hover{color:#fff;background:#20343f}.nav button.active,.nav button.active:hover{color:#e1ffec;background:#25483f}.nav .icon{font-size:16px;width:19px;text-align:center;font-family:system-ui}.nav-footer{margin-top:auto;padding:18px 13px 0;border-top:1px solid #2b3b46;color:#738893;font-size:11px;line-height:1.7}.workspace{padding:38px max(30px,calc((100vw - 1360px)/2));min-width:0;max-width:1500px;width:100%;margin:0 auto}.page-head{margin-bottom:25px}.page-head .eyebrow{margin-bottom:6px}.page-head h2{font-size:27px}.page-head .muted{margin-top:5px}.eyebrow{font-size:11px;letter-spacing:.13em;font-weight:800;color:#258a79;text-transform:uppercase}
-    .panel{background:#fff;border:1px solid #e4e9ee;border-radius:12px;padding:24px;margin:0 0 18px;box-shadow:0 2px 10px #16304707}.section-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}.section-head .muted{margin-left:auto}.section-head h2{font-size:16px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid #e4e9ee;border-radius:12px;padding:22px;min-height:153px;display:block}.card-title{color:#647387;font-size:13px;font-weight:650}.card-copy{min-width:0}.value{font-size:30px;font-weight:760;letter-spacing:-.05em;margin:12px 0 6px;line-height:1.15}.card .muted{font-size:12px;overflow-wrap:anywhere}.meter{height:5px;border-radius:10px;background:#eef2f5;margin:15px 0 11px;overflow:hidden}.meter span{display:block;height:100%;background:#36a991;border-radius:10px}.card:nth-child(3n+2) .meter span{background:#5885c4}.card:nth-child(3n) .meter span{background:#daaa67}
-    .rings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ring-item{display:flex;align-items:center;gap:16px;padding:8px;min-width:0}.donut{height:90px;width:90px;flex:none;border-radius:50%;display:grid;place-items:center}.donut::before{content:attr(data-value);height:66px;width:66px;display:grid;place-items:center;background:white;border-radius:50%;font-size:16px;font-weight:750;color:#23364a}.ring-item strong{font-size:13px;display:block;margin-bottom:4px}.ring-item small{color:#8693a2;font-size:12px;line-height:1.5;display:block}.ring-note{margin-top:12px;color:#8a97a4;font-size:12px}
-    input,select{min-width:110px;border:1px solid #d9e2e9;background:#fff;border-radius:8px;padding:10px 12px;color:#203146;outline:none}input:focus,select:focus{border-color:#32a88d;box-shadow:0 0 0 3px #39b49520}input::placeholder{color:#a2adba}button{background:#198b75;border:1px solid #198b75;color:white;padding:10px 15px;border-radius:8px;font-weight:650;font-size:13px}button:hover{background:#117761}button.secondary{background:#fff;border-color:#dce4ea;color:#42576d}button.secondary:hover{background:#f4f8f9}button.danger{color:#b84343;background:#fff;border-color:#f0d4d2;padding:6px 11px}button.danger:hover{background:#fff5f4}.form-row{margin-bottom:19px}#pid{width:145px}#serviceName{min-width:220px;flex:1}#search{width:270px}
-    .scroll{overflow:auto;max-height:470px}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #edf0f3}th{color:#8290a0;font-weight:600;font-size:12px;background:#f8fafb;position:sticky;top:0}tr:hover td{background:#f9fbfa}td.command{max-width:270px;overflow:hidden;text-overflow:ellipsis}.badge{display:inline-block;border-radius:20px;padding:4px 10px;font-size:11px;background:#e8f7ef;color:#1d8a60}.badge.exited{background:#eff2f5;color:#778596}.badge.stopped{background:#fff3e5;color:#a76c22}
-    .chart-wrap{height:345px;padding:14px 8px;background:#fff}.chart-wrap svg{display:block;width:100%;height:100%}.chart-legend{display:flex;gap:20px;margin-top:5px;color:#718194;font-size:12px}.chart-legend span::before{content:"";width:9px;height:9px;border-radius:50%;display:inline-block;background:#309d87;margin-right:7px}.chart-legend span:last-child::before{background:#6489cc}#gpuSelect{min-width:185px}
-    #message{margin:0}#message:not(:empty){padding:12px 36px;border-bottom:1px solid #e5eae8;font-size:13px}.error{color:#ae3434;background:#fff2f1}.ok{color:#116e55;background:#ecf8f2}#authPanel{max-width:440px;margin:85px auto;padding:38px}#authPanel h2{font-size:24px;margin:6px 0}#authPanel p{margin:8px 0 24px}#authForm{display:grid;gap:12px}#authForm input,#authForm button{width:100%}
-    @media(max-width:1050px){.cards,.rings{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace{padding:30px 22px}}
-    @media(max-width:720px){.top{height:auto;min-height:68px;padding:13px 16px}#dashboard{display:block;min-height:0}.nav{padding:12px 14px;flex-direction:row;overflow:auto;gap:6px}.nav-title,.nav-footer{display:none}.nav button{white-space:nowrap;width:auto;padding:9px 12px}.workspace{padding:24px 14px}.page-head h2{font-size:23px}.panel{padding:18px}.section-head{flex-wrap:wrap}.section-head .muted{margin-left:0}.cards,.rings{grid-template-columns:repeat(2,minmax(0,1fr))}.ring-item{gap:9px}.donut{height:70px;width:70px}.donut::before{height:52px;width:52px;font-size:13px}#pid,#serviceName,#search{width:100%;min-width:0}#register button,#find{width:100%}.chart-wrap{height:280px}}
-    @media(max-width:450px){.cards,.rings{grid-template-columns:1fr}.ring-item{gap:18px}.brand .muted{display:none}.user-chip{display:none}#authPanel{margin:50px 14px;padding:26px}}
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fd">
+  <title>Server Discover · 服务器监控台</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
 </head>
 <body>
-  <header class="top row"><div class="brand"><span class="logo">S</span><div><h1>Server Discover</h1><div class="muted">服务器运行监控</div></div></div><div class="space"></div><span id="currentUser" class="user-chip" hidden></span><button id="logout" class="secondary" hidden>退出登录</button></header>
-  <p id="message" role="status"></p>
-  <section id="authPanel" class="panel"><div class="eyebrow">WELCOME</div><h2>登录监控台</h2><p class="muted">查看服务器状态，登记并管理你负责的服务。</p><form id="authForm"><input id="username" required minlength="2" maxlength="32" autocomplete="username" placeholder="用户名，支持中文"><input id="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" placeholder="密码（至少 8 位）"><button type="submit" id="login">登录</button><button type="button" id="signup" class="secondary">注册新账号</button></form></section>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h7M11 17.5h7"/></symbol>
+    <symbol id="i-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 12-2L20 12M4 12l2.5 5a7 7 0 0 0 12-2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m17 17 4 4M7.5 11l2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2v10M6.5 5.5a9 9 0 1 0 11 0"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></symbol>
+    <symbol id="i-memory" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 10v4M11 10v4M15 10v4M5 17v3M10 17v3M15 17v3M20 17v3"/></symbol>
+    <symbol id="i-disk" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18M7 17.5h.01M11 17.5h.01"/></symbol>
+    <symbol id="i-gpu" viewBox="0 0 24 24"><rect x="3" y="6" width="17" height="12" rx="2"/><circle cx="11" cy="12" r="3.5"/><path d="M20 10h2v4h-2M6 18v3M15 18v3"/></symbol>
+  </svg>
+
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark"><svg class="icon"><use href="#i-server"></use></svg></span>
+      <div><h1>Server Discover</h1><p class="muted">服务器运行监控</p></div>
+    </div>
+    <div class="top-actions">
+      <span id="currentUser" class="user-chip" hidden></span>
+      <button id="logout" class="secondary" type="button" hidden>退出登录</button>
+    </div>
+  </header>
+
+  <p id="message" role="status" aria-live="polite"></p>
+
+  <section id="authPanel" class="panel auth-panel">
+    <div class="eyebrow">SERVER DISCOVER / ACCESS</div>
+    <h2>登录监控台</h2>
+    <p class="muted">查看服务器状态，登记并管理你负责的服务。</p>
+    <form id="authForm">
+      <label for="username">用户名</label>
+      <input id="username" required minlength="2" maxlength="32" autocomplete="username" placeholder="支持中文名称">
+      <label for="password">密码</label>
+      <input id="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" placeholder="至少 8 位">
+      <button id="login" type="submit">登录</button>
+      <button id="signup" type="button" class="secondary">注册新账号</button>
+    </form>
+  </section>
+
   <main id="dashboard" hidden>
-  <nav class="nav" aria-label="监控导航"><div class="nav-title">WORKSPACE / 工作台</div><button type="button" class="active" data-tab="overview" aria-current="page"><span class="icon">◫</span>运行总览</button><button type="button" data-tab="gpu"><span class="icon">⌁</span>显卡趋势</button><button type="button" data-tab="registry"><span class="icon">▤</span>服务登记</button><button type="button" data-tab="process"><span class="icon">⌕</span>进程查询</button><div class="nav-footer">SERVER DISCOVER<br>本机监控 · 每 5 分钟采样</div></nav>
-  <div class="workspace">
-  <div class="view" data-view="overview"><div class="page-head"><div class="eyebrow">SYSTEM OVERVIEW</div><h2>运行总览</h2><p class="muted">服务器资源状态与最近一次采样</p></div><section class="panel"><div class="section-head"><h2>资源使用情况</h2><span id="sampleTime" class="muted"></span><button id="refresh" class="secondary space" type="button">刷新数据</button></div><div id="cards" class="cards">正在获取数据…</div></section><section class="panel"><div class="section-head"><h2>容量分布</h2><span class="muted">已用 / 可用 · 最近一次采样</span></div><div id="rings" class="rings"></div><p class="ring-note">环形图用于查看资源占用；GPU 利用率等瞬时指标请看上方数值，历史变化请看显卡趋势。</p></section></div>
-  <div class="view" data-view="gpu" hidden><div class="page-head"><div class="eyebrow">GPU ANALYTICS</div><h2>显卡趋势</h2><p class="muted">观察利用率与显存占用随时间的变化</p></div><section class="panel"><div class="section-head"><h2>最近 24 小时</h2><select id="gpuSelect" aria-label="选择显卡"></select><span class="muted">每 5 分钟采样</span></div><div id="gpuChart" class="chart-wrap" role="img" aria-label="显卡利用率与显存使用率趋势">正在获取数据…</div><div class="chart-legend"><span>GPU 利用率</span><span>显存使用率</span></div></section><section class="panel"><div class="section-head"><h2>采样明细</h2></div><div class="scroll"><table><thead><tr><th>时间</th><th>GPU</th><th>GPU 利用率</th><th>显存使用率</th><th>已用 / 总显存</th></tr></thead><tbody id="history"></tbody></table></div></section></div>
-  <div class="view" data-view="registry" hidden><div class="page-head"><div class="eyebrow">SERVICE REGISTRY</div><h2>服务登记</h2><p class="muted">记录谁登记了服务，以及进程的实际运行时间</p></div><section class="panel"><div class="section-head"><h2>登记运行中的进程</h2></div><form id="register" class="row form-row"><input id="pid" type="number" min="1" required placeholder="输入 PID"><input id="serviceName" maxlength="100" required placeholder="自定义服务名称，支持中文"><button>登记进程</button></form><p class="muted">开始时间取进程实际启动时间；进程所属用户来自 Linux，登记用户来自登录账号。自然退出时以发现退出的时间记录。</p></section><section class="panel"><div class="section-head"><h2>登记记录</h2></div><div class="scroll"><table><thead><tr><th>服务名称</th><th>PID</th><th>进程所属用户</th><th>登记用户</th><th>开始时间</th><th>停止时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="services"></tbody></table></div></section></div>
-  <div class="view" data-view="process" hidden><div class="page-head"><div class="eyebrow">PROCESS EXPLORER</div><h2>进程查询</h2><p class="muted">按名称、PID 或启动命令定位正在运行的进程</p></div><section class="panel"><div class="section-head"><h2>筛选进程</h2></div><div class="row form-row"><input id="search" placeholder="名称、命令或 PID"><button id="find" class="secondary">查询进程</button></div><div class="scroll"><table><thead><tr><th>PID</th><th>进程</th><th>用户</th><th>内存占比</th><th>物理内存</th><th>启动时间</th><th>命令</th><th>操作</th></tr></thead><tbody id="processes"></tbody></table></div></section></div>
-  </div></main><script>
-    const $=id=>document.getElementById(id);
-    let currentUser=null;
-    function showUser(user){currentUser=user;$('authPanel').hidden=!!user;$('dashboard').hidden=!user;$('logout').hidden=!user;$('currentUser').hidden=!user;$('currentUser').textContent=user?'登录用户：'+user.username:''}
-    const fmt=t=>t?new Date(t*1000).toLocaleString('zh-CN'):'—';
-    const number=n=>Number(n).toFixed(1);
-    const cell=(tr,value,cls)=>{const td=document.createElement('td');td.textContent=String(value??'—');if(cls)td.className=cls;tr.append(td);return td};
-    function message(value,error=false){$('message').textContent=value;$('message').className=error?'error':'ok'}
-    async function api(path,options={}){
-      const token=sessionStorage.getItem('monitorSession');
-      const response=await fetch('/api'+path,{...options,headers:{...(token?{Authorization:'Bearer '+token}:{}),...(options.body?{'Content-Type':'application/json'}:{})}});
-      if(!response.ok){let body={};try{body=await response.json()}catch{};throw Error(typeof body.detail==='string'?body.detail:`请求失败 (${response.status})`)}
-      return response.json();
-    }
-    function card(title,percent,detail){const box=document.createElement('div');box.className='card';const label=document.createElement('div');label.className='card-title';label.textContent=title;const value=document.createElement('div');value.className='value';value.textContent=number(percent)+'%';const bar=document.createElement('div');bar.className='meter';const fill=document.createElement('span');fill.style.width=Math.max(0,Math.min(100,Number(percent)||0))+'%';bar.append(fill);const desc=document.createElement('div');desc.className='muted';desc.textContent=detail;box.append(label,value,bar,desc);return box}
-    function ring(title,percent,detail,color){const item=document.createElement('div');item.className='ring-item';const chart=document.createElement('div');chart.className='donut';const pct=Math.max(0,Math.min(100,Number(percent)||0));chart.dataset.value=number(percent)+'%';chart.style.background=`conic-gradient(${color} ${pct}%,#eaf0f2 ${pct}% 100%)`;chart.setAttribute('role','img');chart.setAttribute('aria-label',title+'已用 '+number(percent)+'%');const copy=document.createElement('div');const name=document.createElement('strong');name.textContent=title;const text=document.createElement('small');text.textContent=detail;copy.append(name,text);item.append(chart,copy);return item}
-    async function metrics(){const data=await api('/metrics');const box=$('cards'),rings=$('rings');box.replaceChildren();rings.replaceChildren();if(!data.timestamp){box.textContent='正在采样…';return}
-      $('sampleTime').textContent='采样时间：'+fmt(data.timestamp);
-      box.append(card('CPU 使用率',data.cpu_percent,'全部逻辑核心'),card('物理内存使用率',data.memory_percent,`已用 ${data.memory_used_gb} / 总量 ${data.memory_total_gb} GB · 可用 ${data.memory_available_gb} GB`));
-      if(data.swap_total_gb>0)box.append(card('Swap 使用率',data.swap_percent,`已用 ${data.swap_used_gb} / 总量 ${data.swap_total_gb} GB`));
-      box.append(card('根分区使用率',data.disk_percent,`${data.disk_used_gb} / ${data.disk_total_gb} GB`));
-      rings.append(ring('物理内存',data.memory_percent,`已用 ${data.memory_used_gb} / 总量 ${data.memory_total_gb} GB`,'#36a991'),ring('根分区',data.disk_percent,`已用 ${data.disk_used_gb} / 总量 ${data.disk_total_gb} GB`,'#daaa67'));
-      if(data.gpu.available){for(const gpu of data.gpu.devices){box.append(card(`GPU ${gpu.index} 利用率`,gpu.utilization_percent,gpu.name),card(`GPU ${gpu.index} 显存使用率`,gpu.memory_percent,`${gpu.memory_used_mb} / ${gpu.memory_total_mb} MiB · ${gpu.temperature_c??'—'} °C`));rings.append(ring(`GPU ${gpu.index} 显存`,gpu.memory_percent,`已用 ${gpu.memory_used_mb} / 总量 ${gpu.memory_total_mb} MiB`,'#6489cc'))}}
-      else {const info=document.createElement('p');info.className='muted';info.textContent='GPU：'+data.gpu.error;box.append(info)}
-    }
-    let gpuSamples=[];
-    const svgNS='http://www.w3.org/2000/svg';
-    function svgEl(tag,attributes={}){const el=document.createElementNS(svgNS,tag);for(const [key,value] of Object.entries(attributes))el.setAttribute(key,String(value));return el}
-    function renderChart(){const container=$('gpuChart');container.replaceChildren();const selected=Number($('gpuSelect').value);const points=gpuSamples.flatMap(s=>{const gpu=s.gpu.devices.find(g=>g.index===selected);return gpu?[{time:s.timestamp,util:gpu.utilization_percent,memory:gpu.memory_percent}]:[]});if(!points.length){container.textContent='暂无该显卡的历史采样数据';return}
-      const svg=svgEl('svg',{viewBox:'0 0 800 240',preserveAspectRatio:'none','aria-hidden':'true'});const left=42,right=780,top=14,bottom=205;const first=points[0].time,last=points[points.length-1].time;const x=t=>first===last?(left+right)/2:left+(t-first)/(last-first)*(right-left);const y=v=>bottom-Math.max(0,Math.min(100,Number(v)))/100*(bottom-top);
-      for(const pct of [0,25,50,75,100]){const line=svgEl('line',{x1:left,y1:y(pct),x2:right,y2:y(pct),stroke:'#e5ebf3','stroke-width':1});svg.append(line);const label=svgEl('text',{x:3,y:y(pct)+4,fill:'#8190a5','font-size':11});label.textContent=pct+'%';svg.append(label)}
-      for(const [key,color] of [['util','#309d87'],['memory','#6489cc']]){if(points.length===1){svg.append(svgEl('circle',{cx:x(first),cy:y(points[0][key]),r:5,fill:color}));continue}const path=svgEl('polyline',{points:points.map(p=>`${x(p.time)},${y(p[key])}`).join(' '),fill:'none',stroke:color,'stroke-width':2.8,'stroke-linecap':'round','stroke-linejoin':'round'});svg.append(path)}
-      const startLabel=svgEl('text',{x:left,y:234,fill:'#8190a5','font-size':11});startLabel.textContent=fmt(first);const endLabel=svgEl('text',{x:right,y:234,fill:'#8190a5','font-size':11,'text-anchor':'end'});endLabel.textContent=fmt(last);svg.append(startLabel,endLabel);container.append(svg)
-    }
-    async function history(){const data=await api('/history?limit=288');gpuSamples=data;const body=$('history');body.replaceChildren();const gpuIds=new Map();for(const sample of data){for(const gpu of sample.gpu.devices)gpuIds.set(gpu.index,gpu.name)}const select=$('gpuSelect');const previous=select.value;select.replaceChildren();for(const [id,name] of gpuIds){const option=document.createElement('option');option.value=id;option.textContent=`GPU ${id} · ${name}`;select.append(option)}if(previous!==''&&gpuIds.has(Number(previous)))select.value=previous;select.disabled=!gpuIds.size;renderChart();for(const sample of data.slice().reverse()){for(const gpu of sample.gpu.devices){const row=document.createElement('tr');[fmt(sample.timestamp),gpu.name,number(gpu.utilization_percent)+'%',number(gpu.memory_percent)+'%',gpu.memory_used_mb+' / '+gpu.memory_total_mb+' MiB'].forEach(v=>cell(row,v));body.append(row)}}if(!body.children.length)body.textContent='暂无显卡采样数据'}
-    async function services(){const data=await api('/services');const body=$('services');body.replaceChildren();for(const item of data){const row=document.createElement('tr');[item.name,item.pid,item.started_by||'历史记录',item.registered_by||'历史记录',fmt(item.started_at),fmt(item.stopped_at)].forEach(v=>cell(row,v));const statusCell=document.createElement('td');const badge=document.createElement('span');badge.className='badge '+(item.status==='running'?'':item.status);badge.textContent=item.status==='running'?'运行中':item.status==='stopped'?'已停止':'已退出';statusCell.append(badge);row.append(statusCell);const action=document.createElement('td');if(item.status==='running'&&item.user_id===currentUser.id){const btn=document.createElement('button');btn.className='danger';btn.textContent='停止';btn.onclick=()=>stopService(item,btn);action.append(btn)}row.append(action);body.append(row)}if(!data.length)body.textContent='暂无登记记录'}
-    async function find(){try{const data=await api('/processes?q='+encodeURIComponent($('search').value.trim()));const body=$('processes');body.replaceChildren();for(const item of data){const row=document.createElement('tr');[item.pid,item.name,item.user,number(item.memory_percent)+'%',item.memory_rss_mb==null?'—':item.memory_rss_mb+' MiB',fmt(item.started_at),item.command].forEach((v,i)=>cell(row,v,i===6?'command':''));const action=document.createElement('td');const btn=document.createElement('button');btn.className='secondary';btn.textContent='填入登记';btn.onclick=()=>{$('pid').value=item.pid;$('serviceName').value=item.name;switchTab('registry');$('serviceName').focus()};action.append(btn);row.append(action);body.append(row)}if(!data.length)body.textContent='未找到进程'}catch(e){message(e.message,true)}}
-    async function stopService(item,button){if(!confirm(`确定向「${item.name}」(PID ${item.pid}) 发送停止信号吗？`))return;button.disabled=true;try{await api(`/services/${item.id}/stop`,{method:'POST'});message('已停止 '+item.name);await services()}catch(e){message(e.message,true);button.disabled=false}}
-    $('register').onsubmit=async e=>{e.preventDefault();try{await api('/services',{method:'POST',body:JSON.stringify({pid:Number($('pid').value),name:$('serviceName').value})});message('登记成功');$('register').reset();await services()}catch(err){message(err.message,true)}};
-    async function authenticate(mode){if(!$('authForm').reportValidity())return;try{const result=await api('/auth/'+mode,{method:'POST',body:JSON.stringify({username:$('username').value.trim(),password:$('password').value})});sessionStorage.setItem('monitorSession',result.token);$('password').value='';showUser(result.user);message(mode==='register'?'注册成功':'登录成功');await refresh()}catch(e){message(e.message,true)}}
-    $('authForm').onsubmit=e=>{e.preventDefault();authenticate('login')};$('signup').onclick=()=>authenticate('register');
-    $('logout').onclick=async()=>{try{await api('/auth/logout',{method:'POST'})}finally{sessionStorage.removeItem('monitorSession');showUser(null);message('已退出登录')}};
-    function switchTab(tab){for(const view of document.querySelectorAll('[data-view]'))view.hidden=view.dataset.view!==tab;for(const button of document.querySelectorAll('[data-tab]')){const active=button.dataset.tab===tab;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')}if(tab==='process'&&!$('processes').children.length)find()}
-    document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>switchTab(button.dataset.tab));$('gpuSelect').onchange=renderChart;
-    $('find').onclick=find;$('refresh').onclick=refresh;$('search').onkeydown=e=>{if(e.key==='Enter')find()};
-    async function refresh(){if(!currentUser)return;try{await Promise.all([metrics(),history(),services()])}catch(e){message(e.message,true);if(e.message.includes('登录')){sessionStorage.removeItem('monitorSession');showUser(null)}}}
-    async function initialize(){if(!sessionStorage.getItem('monitorSession'))return;try{showUser(await api('/auth/me'));await refresh()}catch{sessionStorage.removeItem('monitorSession');showUser(null)}}
-    initialize();setInterval(refresh,30000);
-  </script>
-</body></html>
+    <nav class="nav" aria-label="监控导航">
+      <div class="nav-title">工作台 · WORKSPACE</div>
+      <button type="button" class="active" data-tab="overview" aria-current="page"><svg class="icon"><use href="#i-overview"></use></svg><span>运行总览</span></button>
+      <button type="button" data-tab="gpu"><svg class="icon"><use href="#i-activity"></use></svg><span>显卡趋势</span></button>
+      <button type="button" data-tab="registry"><svg class="icon"><use href="#i-list"></use></svg><span>服务登记</span></button>
+      <button type="button" data-tab="process"><svg class="icon"><use href="#i-search"></use></svg><span>进程查询</span></button>
+      <div class="nav-footer"><span class="status-dot"></span>本机监控<span class="nav-footer-note">每 5 分钟采样</span></div>
+    </nav>
+
+    <div class="workspace">
+      <div class="view" data-view="overview">
+        <div class="page-head"><div class="eyebrow">SYSTEM OVERVIEW</div><h2>运行总览</h2><p class="muted">服务器资源状态与最近一次采样</p></div>
+        <section class="panel">
+          <div class="section-head"><h2>资源使用情况</h2><span id="sampleTime" class="muted"></span><button id="refresh" type="button" class="secondary refresh-button"><svg class="icon"><use href="#i-refresh"></use></svg>刷新数据</button></div>
+          <div id="cards" class="cards">正在获取数据…</div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2>容量分布</h2><span class="muted section-note">已用 / 可用 · 最近一次采样</span></div>
+          <div id="rings" class="rings"></div>
+          <p class="ring-note">环形图展示资源占用；GPU 利用率等瞬时指标请看上方数值，历史变化请看显卡趋势。</p>
+        </section>
+      </div>
+
+      <div class="view" data-view="gpu" hidden>
+        <div class="page-head"><div class="eyebrow">GPU ANALYTICS</div><h2>显卡趋势</h2><p class="muted">观察利用率与显存占用随时间的变化</p></div>
+        <section class="panel chart-panel">
+          <div class="section-head"><h2>最近 24 小时</h2><select id="gpuSelect" aria-label="选择显卡"></select><span class="muted">每 5 分钟采样</span></div>
+          <div class="chart-toolbar"><div class="chart-legend"><span>GPU 利用率</span><span>显存使用率</span></div><p id="gpuChartHint" class="muted">点击图表，查看距离该位置最近的采样点</p></div>
+          <div class="chart-wrap">
+            <div id="gpuChart" class="chart-canvas" role="group" tabindex="0" aria-label="显卡利用率与显存使用率趋势" aria-describedby="gpuChartHint">正在获取数据…</div>
+          </div>
+          <div class="chart-selection" aria-live="polite" aria-label="当前选中采样点的数据">
+            <div class="selection-time"><span class="selection-label">当前选中 · <span id="gpuPointName">GPU</span></span><strong id="gpuPointTime">—</strong></div>
+            <div class="selection-stat"><span>GPU 利用率</span><strong id="gpuPointUtil">—</strong></div>
+            <div class="selection-stat"><span>显存使用率</span><strong id="gpuPointMemory">—</strong><small id="gpuPointCapacity">—</small></div>
+            <div class="selection-stat"><span>显卡温度</span><strong id="gpuPointTemperature">—</strong></div>
+          </div>
+        </section>
+        <section class="panel"><div class="section-head"><h2>采样明细</h2><span class="muted section-note">当前选择的显卡 · 最新记录在前</span></div><div class="scroll"><table><thead><tr><th>时间</th><th>GPU</th><th>GPU 利用率</th><th>显存使用率</th><th>已用 / 总显存</th></tr></thead><tbody id="history"></tbody></table></div></section>
+      </div>
+
+      <div class="view" data-view="registry" hidden>
+        <div class="page-head"><div class="eyebrow">SERVICE REGISTRY</div><h2>服务登记</h2><p class="muted">核对进程、填写中文名称，管理服务运行记录</p></div>
+        <div class="registry-summary">
+          <div><span>运行中</span><strong id="runningCount">0</strong></div>
+          <div><span>已停止</span><strong id="stoppedCount">0</strong></div>
+          <div><span>已退出</span><strong id="exitedCount">0</strong></div>
+        </div>
+        <section class="panel register-panel">
+          <div class="section-head"><div><div class="eyebrow">NEW REGISTRATION</div><h2>登记运行中的进程</h2></div><span class="muted section-note">第一步 · 核对 PID　 第二步 · 填写名称</span></div>
+          <form id="register">
+            <div class="register-fields">
+              <label for="pid">进程 PID<input id="pid" type="number" min="1" required placeholder="例如 12345" inputmode="numeric"></label>
+              <button id="checkPid" type="button" class="secondary"><svg class="icon"><use href="#i-check"></use></svg>核对 PID</button>
+              <label for="serviceName" class="name-field">服务名称<input id="serviceName" maxlength="100" required placeholder="自定义名称，支持中文"></label>
+              <button id="registerButton" type="submit"><svg class="icon"><use href="#i-plus"></use></svg>登记服务</button>
+            </div>
+            <div id="processPreview" class="process-preview" role="status" aria-live="polite">输入 PID 后点击“核对 PID”，确认进程信息再登记。</div>
+          </form>
+          <p class="muted form-help">开始时间取进程实际启动时间；登记用户是当前登录账号。进程自然退出时，停止时间为系统发现退出的时间。</p>
+        </section>
+        <section class="panel">
+          <div class="section-head registry-toolbar">
+            <div><div class="eyebrow">RECORDS</div><h2>登记记录</h2></div>
+            <div class="row"><input id="serviceSearch" aria-label="搜索登记记录" placeholder="搜索名称、PID 或用户"><select id="serviceStatus" aria-label="筛选服务状态"><option value="all">全部状态</option><option value="running">运行中</option><option value="stopped">已停止</option><option value="exited">已退出</option></select><button id="reloadServices" type="button" class="secondary"><svg class="icon"><use href="#i-refresh"></use></svg>刷新记录</button></div>
+          </div>
+          <div class="scroll"><table><thead><tr><th>服务名称</th><th>PID</th><th>进程所属用户</th><th>登记用户</th><th>开始时间</th><th>停止时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="services"></tbody></table></div>
+          <p id="servicesEmpty" class="empty-state" hidden>没有符合条件的登记记录。</p>
+        </section>
+      </div>
+
+      <div class="view" data-view="process" hidden>
+        <div class="page-head"><div class="eyebrow">PROCESS EXPLORER</div><h2>进程查询</h2><p class="muted">按名称、PID 或启动命令定位正在运行的进程</p></div>
+        <section class="panel">
+          <div class="section-head"><h2>筛选进程</h2></div>
+          <div class="row form-row"><input id="search" aria-label="进程搜索" placeholder="名称、命令或 PID"><button id="find" type="button" class="secondary"><svg class="icon"><use href="#i-search"></use></svg>查询进程</button></div>
+          <div class="scroll"><table><thead><tr><th>PID</th><th>进程</th><th>用户</th><th>内存占比</th><th>物理内存</th><th>启动时间</th><th>命令</th><th>操作</th></tr></thead><tbody id="processes"></tbody></table></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

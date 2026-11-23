@@ -17,6 +17,7 @@ from typing import Optional
 import psutil
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from monitor import host_metrics
@@ -114,6 +115,7 @@ async def lifespan(_app):
 
 
 app = FastAPI(title="服务器监控", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
 
 def hash_password(password):
@@ -200,6 +202,7 @@ def logout(user=Depends(authorize), authorization: Optional[str] = Header(defaul
 class Registration(BaseModel):
     pid: int = Field(gt=0)
     name: str = Field(min_length=1, max_length=100)
+    expected_started_at: Optional[float] = None
 
 
 @app.get("/")
@@ -239,6 +242,25 @@ def processes(q: str = Query(default="", max_length=100)):
     return sorted(found, key=lambda p: p["pid"], reverse=True)[:200]
 
 
+@app.get("/api/processes/{pid}", dependencies=[Depends(authorize)])
+def process_detail(pid: int):
+    if pid <= 0:
+        raise HTTPException(422, "请输入有效的 PID")
+    try:
+        proc = psutil.Process(pid)
+        with proc.oneshot():
+            if not proc.is_running() or proc.status() == psutil.STATUS_ZOMBIE:
+                raise HTTPException(404, "进程不存在或已退出")
+            memory = proc.memory_info()
+            return {"pid": pid, "name": proc.name(), "user": proc.username(),
+                    "started_at": proc.create_time(), "memory_rss_mb": round(memory.rss / 1024 ** 2, 1),
+                    "command": " ".join(proc.cmdline())[:250]}
+    except psutil.NoSuchProcess:
+        raise HTTPException(404, "进程不存在或已退出")
+    except psutil.AccessDenied:
+        raise HTTPException(403, "当前用户无权查看此进程")
+
+
 @app.get("/api/services")
 def services(user=Depends(authorize)):
     reconcile_services()
@@ -256,6 +278,8 @@ def register(item: Registration, user=Depends(authorize)):
     try:
         proc = psutil.Process(item.pid)
         started_at = proc.create_time()
+        if item.expected_started_at is not None and abs(started_at - item.expected_started_at) >= 0.001:
+            raise HTTPException(409, "PID 对应的进程已变化，请重新核对")
         started_by = proc.username()
         if not process_matches(item.pid, started_at):
             raise HTTPException(404, "进程不存在")
